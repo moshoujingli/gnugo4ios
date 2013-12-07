@@ -1,0 +1,19 @@
+首先我假设你的电脑是64位的ios，工具BSD的，zsh
+先把gnugoc的源码下下来，放在和脚本还有util一个文件夹下，就像这样
+gnugo
+makego4ios.sh
+util
+然后
+sh makego4ios.sh
+即可，开头是编译gnugo，中间如果说文件已有，或者找不到endgame.c或者influnce.c的话都不要紧（我没处理前面的操作已经完成改名的情况）,
+然后等完全运行完了，出来的文件夹gnugolib，那个a是静态库文件，包含虚拟机用的64和32位以及真机用的32位，具体信息刚才那个脚本运行完的最后一句已经用lipo打出来了。
+
+I assumed that you run this on the 64bit MACOS with zsh and BSD tools.
+put the source code of the GNU GO at the same folder of this tool.Seems like:
+gnugo
+makego4ios.sh
+util
+Then run the makego4ios.sh:
+sh makego4ios.sh
+The error meg such like cant find file endgame,c and influnce.c is ok because I dont deal with the error that the file have already renamed.(It doesn't metter)
+While this finished ,you will find a folder named gnugolib and the header and stalib is in it.
