@@ -4,6 +4,7 @@ cd ./gnugo
 ./configure
 sed -i "" '/TERM/d' config.h
 sed -i "" '/NCURSES/d' config.h
+echo '#define GG_TURN_OFF_ASSERTS 1'>>config.h
 #x86_64
 make
 make clean
@@ -18,10 +19,10 @@ cp -r ./gnugo ./gnugo32
 #do compile
 mkdir gnugolib
 mkdir gnugolib/include
-for type in 'armv7' 'armv7s' 'i386' 'x86_64'; do
+for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
 	mkdir $type;
 	compileFolder='./gnugo32';
-	if [[ $type == 'x86_64' ]]; then
+	if [[ $type = 'x86_64' || $type == 'arm64' ]]; then
 		compileFolder='./gnugo64';
 	fi
 	cd $compileFolder;
@@ -32,7 +33,7 @@ for type in 'armv7' 'armv7s' 'i386' 'x86_64'; do
 			mv influence.c influencep.c
 			mv endgame.c endgamep.c
 		fi
-		if [[ $type = 'armv7' || $type = 'armv7s' ]]; then
+		if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
 			./compile.sh ../../$type $type
 		else
 			./smcompile.sh  ../../$type $type
@@ -43,12 +44,12 @@ for type in 'armv7' 'armv7s' 'i386' 'x86_64'; do
 done
 
 
-for type in 'armv7' 'armv7s' 'i386' 'x86_64'; do
+for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
 	cd ./$type
-		if [[ $type = 'armv7s' || $type = 'armv7' ]]; then
-			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk';
+		if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
+			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk';
 		else
-			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk';
+			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk';
 		fi
 		/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only $type -syslibroot $sdkPath *.o -o gnugo.a
 	cd -
@@ -61,10 +62,11 @@ xcrun -sdk iphoneos lipo -output ./gnugo.a -create \
 -arch armv7 ../armv7/gnugo.a \
 -arch i386 ../i386/gnugo.a \
 -arch x86_64 ../x86_64/gnugo.a
+-arch arm64 ../arm64/gnugo.a
 lipo -info ./gnugo.a
 cd ..
 #clean
-for type in 'armv7' 'armv7s' 'i386' 'x86_64'; do
+for type in 'arm64' 'armv7' 'armv7s' 'i386' 'x86_64'; do
 	rm -rf ./$type;
 done
 rm -rf gnugo32
