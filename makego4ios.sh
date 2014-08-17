@@ -1,4 +1,4 @@
-
+export SDK_VERSION=7.1
 #make the different typefils to compile
 cd ./gnugo
 ./configure
@@ -20,39 +20,42 @@ cp -r ./gnugo ./gnugo32
 mkdir gnugolib
 mkdir gnugolib/include
 for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
-	mkdir $type;
-	compileFolder='./gnugo32';
-	if [[ $type = 'x86_64' || $type == 'arm64' ]]; then
-		compileFolder='./gnugo64';
-	fi
-	cd $compileFolder;
-	for folder in 'engine' 'patterns' 'interface' 'sgf' 'utils'; do
-		cd $folder
-		cp ../../util/$folder/* ./
-		if [[ $folder = 'patterns' ]]; then
-			mv influence.c influencep.c
-			mv endgame.c endgamep.c
-		fi
-		if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
-			./compile.sh ../../$type $type
-		else
-			./smcompile.sh  ../../$type $type
-		fi
-		cd ..
-	done
-	cd ..
+    mkdir $type;
+    compileFolder='./gnugo32';
+    if [[ $type = 'x86_64' || $type == 'arm64' ]]; then
+        compileFolder='./gnugo64';
+    fi
+    cd $compileFolder;
+    for folder in 'engine' 'patterns' 'interface' 'sgf' 'utils'; do
+        cd $folder
+        cp ../../util/$folder/* ./
+        if [[ $folder = 'patterns' ]]; then
+            mv influence.c influencep.c
+            mv endgame.c endgamep.c
+        fi
+        if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
+            export SDK_TYPE='OS'
+        else
+            export SDK_TYPE='Simulator'
+        fi
+        export CC_HEAD="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -arch $type -g -O2  -c -I/Applications/Xcode.app/Contents/Developer/Platforms/iPhone${SDK_TYPE}.platform/Developer/SDKs/iPhone${SDK_TYPE}${SDK_VERSION}.sdk/usr/include -DHAVE_CONFIG_H -I. -I.."
+        ./compile.sh ../../$type $type
+        cd ..
+    done
+    cd ..
 done
 
 
 for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
-	cd ./$type
-		if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
-			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk';
-		else
-			sdkPath='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk';
-		fi
-		/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only $type -syslibroot $sdkPath *.o -o gnugo.a
-	cd -
+    cd ./$type
+        if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
+            export SDK_TYPE='OS'
+        else
+            export SDK_TYPE='Simulator'
+        fi
+        sdkPath="/Applications/Xcode.app/Contents/Developer/Platforms/iPhone${SDK_TYPE}.platform/Developer/SDKs/iPhone${SDK_TYPE}${SDK_VERSION}.sdk";
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only $type -syslibroot $sdkPath *.o -o gnugo.a
+    cd -
 done
 
 cd gnugolib
@@ -61,13 +64,13 @@ xcrun -sdk iphoneos lipo -output ./gnugo.a -create \
 -arch armv7s ../armv7s/gnugo.a \
 -arch armv7 ../armv7/gnugo.a \
 -arch i386 ../i386/gnugo.a \
--arch x86_64 ../x86_64/gnugo.a
+-arch x86_64 ../x86_64/gnugo.a \
 -arch arm64 ../arm64/gnugo.a
 lipo -info ./gnugo.a
 cd ..
 #clean
 for type in 'arm64' 'armv7' 'armv7s' 'i386' 'x86_64'; do
-	rm -rf ./$type;
+    rm -rf ./$type;
 done
 rm -rf gnugo32
 rm -rf gnugo64
