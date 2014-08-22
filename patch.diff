@@ -1,0 +1,114 @@
+From 032530ae5b58937f64063a32803dee0668df4b9f Mon Sep 17 00:00:00 2001
+From: BiXiaopeng <bixiaopeng@BiXiaopengdeMacBook-Pro.local>
+Date: Sun, 5 Jan 2014 12:02:12 +0900
+Subject: [PATCH] change shadow to board shadow
+
+---
+ engine/board.c      |  2 +-
+ engine/board.h      |  2 +-
+ engine/boardlib.c   |  2 +-
+ engine/persistent.c |  2 +-
+ engine/reading.c    | 16 ++++++++--------
+ 5 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/engine/board.c b/engine/board.c
+index 9390c8f..368fa5b 100644
+--- a/engine/board.c
++++ b/engine/board.c
+@@ -661,7 +661,7 @@ do_trymove(int pos, int color, int ignore_ko)
+     ASSERT_ON_BOARD1(pos);
+     
+     /* Update the reading tree shadow. */
+-    shadow[pos] = 1;
++    board_shadow[pos] = 1;
+ 
+     /* 3. The location must be empty. */
+     if (board[pos] != EMPTY)
+diff --git a/engine/board.h b/engine/board.h
+index 7dab1f2..3c8e19f 100644
+--- a/engine/board.h
++++ b/engine/board.h
+@@ -203,7 +203,7 @@ extern float        komi;
+ extern int          handicap;     /* used internally in chinese scoring */
+ extern int          movenum;      /* movenumber - used for debug output */
+ 		    
+-extern signed char  shadow[BOARDMAX];      /* reading tree shadow */
++extern signed char  board_shadow[BOARDMAX];      /* reading tree shadow */
+ 
+ enum suicide_rules {
+   FORBIDDEN,
+diff --git a/engine/boardlib.c b/engine/boardlib.c
+index c4789da..b9292dd 100644
+--- a/engine/boardlib.c
++++ b/engine/boardlib.c
+@@ -50,7 +50,7 @@ enum suicide_rules suicide_rule = FORBIDDEN;
+ enum ko_rules ko_rule = SIMPLE;
+ 
+ 
+-signed char shadow[BOARDMAX];
++signed char board_shadow[BOARDMAX];
+ 
+ /* Hashing of positions. */
+ Hash_data board_hash;
+diff --git a/engine/persistent.c b/engine/persistent.c
+index 1ca7598..7c0490c 100644
+--- a/engine/persistent.c
++++ b/engine/persistent.c
+@@ -620,7 +620,7 @@ store_persistent_reading_cache(enum routine_id routine, int str,
+   store_persistent_cache(&reading_cache, routine,
+       			 str, NO_MOVE, NO_MOVE, EMPTY, NULL,
+ 			 result, NO_MOVE, move, NO_MOVE, -1, -1,
+-			 nodes, shadow, EMPTY);
++			 nodes, board_shadow, EMPTY);
+ }
+ 
+ static void
+diff --git a/engine/reading.c b/engine/reading.c
+index d231cc9..a3f88cb 100644
+--- a/engine/reading.c
++++ b/engine/reading.c
+@@ -369,7 +369,7 @@ attack(int str, int *move)
+     return result;
+   }
+ 
+-  memset(shadow, 0, sizeof(shadow));
++  memset(board_shadow, 0, sizeof(board_shadow));
+   result = do_attack(str, &the_move);
+   nodes = reading_node_counter - nodes_when_called;
+ 
+@@ -440,7 +440,7 @@ find_defense(int str, int *move)
+     return result;
+   }
+ 
+-  memset(shadow, 0, sizeof(shadow));
++  memset(board_shadow, 0, sizeof(board_shadow));
+   result = do_find_defense(str, &the_move);
+   nodes = reading_node_counter - nodes_when_called;
+ 
+@@ -5527,17 +5527,17 @@ draw_reading_shadow()
+     
+     for (j = 0; j < board_size; j++) {
+       pos = POS(i, j);
+-      if (!shadow[pos] && board[pos] == EMPTY)
++      if (!board_shadow[pos] && board[pos] == EMPTY)
+ 	c = '.';
+-      else if (!shadow[pos] && board[pos] == WHITE)
++      else if (!board_shadow[pos] && board[pos] == WHITE)
+ 	c = 'O';
+-      else if (!shadow[pos] && board[pos] == BLACK)
++      else if (!board_shadow[pos] && board[pos] == BLACK)
+ 	c = 'X';
+-      if (shadow[pos] && board[pos] == EMPTY)
++      if (board_shadow[pos] && board[pos] == EMPTY)
+ 	c = ',';
+-      else if (shadow[pos] && board[pos] == WHITE)
++      else if (board_shadow[pos] && board[pos] == WHITE)
+ 	c = 'o';
+-      else if (shadow[pos] && board[pos] == BLACK)
++      else if (board_shadow[pos] && board[pos] == BLACK)
+ 	c = 'x';
+       
+       fprintf(stderr, " %c", c);
+-- 
+1.8.4.2
+
