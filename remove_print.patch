@@ -1,0 +1,246 @@
+diff --git a/engine/printutils.c b/engine/printutils.c
+index 7a1509e..1496c44 100644
+--- a/engine/printutils.c
++++ b/engine/printutils.c
+@@ -48,7 +48,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+   if (fmt[0] == '%' && fmt[1] == 'o')
+     fmt += 2;  /* cancel indent */
+   else if (stackp > 0)
+-    fprintf(outputfile, "%.*s", stackp*2, "                                ");
++    ;
+ 
+   for (; *fmt; ++fmt) {
+     if (*fmt == '%') {
+@@ -63,19 +63,19 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+       case 'd':
+       {
+ 	int d = va_arg(ap, int);
+-	fprintf(outputfile, "%d", d);
++	;
+ 	break;
+       }
+       case 'x':
+       {
+ 	unsigned int d = va_arg(ap, unsigned int);
+-	fprintf(outputfile, "%x", d);
++	;
+ 	break;
+       }
+       case 'f':
+       {
+ 	double f = va_arg(ap, double); /* passed as double, not float */
+-	fprintf(outputfile, "%.2f", f);
++	;
+ 	break;
+       }
+       case 's':
+@@ -87,7 +87,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+       case '2':
+         fmt++;
+         if (*fmt != 'm' && *fmt != 'M') {
+-	  fprintf(outputfile, "\n\nUnknown format string '2%c'\n", *fmt);
++	  ;
+ 	  break;
+         }
+         /* else fall through - 2 modifier on %m is default. */
+@@ -100,7 +100,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+ 	if (m == -1 && n == -1)
+ 	  fputs("PASS", outputfile);
+ 	else if (!ON_BOARD2(m, n))
+-	  fprintf(outputfile, "[%d,%d]", m, n);
++	  ;
+ 	else {
+ 	  /* Generate the move name. */
+ 	  if (n < 8)
+@@ -118,7 +118,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+       case '1':
+       fmt++;
+       if (*fmt != 'm' && *fmt != 'M') {
+-	fprintf(outputfile, "\n\nUnknown format string '1%c'\n", *fmt);
++	;
+ 	break;
+       }
+       else {
+@@ -129,7 +129,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+ 	if (pos == NO_MOVE)
+ 	  fputs("PASS", outputfile);
+ 	else if (!ON_BOARD1(pos))
+-	  fprintf(outputfile, "[%d]", pos);
++	  ;
+ 	else {
+ 	  /* Generate the move name. */
+ 	  if (n < 8)
+@@ -147,7 +147,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+       case 'H':
+       {
+ 	unsigned long h = va_arg(ap, unsigned long);
+-	fprintf(outputfile, "%lx", h);
++	;
+ 	break;
+       }
+       case 'C':
+@@ -157,7 +157,7 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+ 	break;
+       }
+       default:
+-	fprintf(outputfile, "\n\nUnknown format character '%c'\n", *fmt);
++	;
+ 	break;
+       }
+     }
+@@ -172,11 +172,11 @@ vgprintf(FILE *outputfile, const char *fmt, va_list ap)
+  */
+ 
+ void 
+-gfprintf(FILE *outfile, const char *fmt, ...)
++gfprintf(FILE *file,const char *fmt, ...)
+ {
+   va_list ap;
+   va_start(ap, fmt);
+-  vgprintf(outfile, fmt, ap);
++  //vgprintf(outfile, fmt, ap);
+   va_end(ap);
+ }
+ 
+@@ -191,7 +191,7 @@ gprintf(const char *fmt, ...)
+ {
+   va_list ap;
+   va_start(ap, fmt);
+-  vgprintf(stderr, fmt, ap);
++  //vgprintf(stderr, fmt, ap);
+   va_end(ap);
+   return 1;
+ }
+@@ -207,7 +207,7 @@ mprintf(const char *fmt, ...)
+ {
+   va_list ap;
+   va_start(ap, fmt);
+-  vgprintf(stdout, fmt, ap);
++  //vgprintf(stdout, fmt, ap);
+   va_end(ap);
+ }
+ 
+@@ -218,50 +218,6 @@ mprintf(const char *fmt, ...)
+ static void
+ dump_board_sgf(void)
+ {
+-  int pos;
+-  int initial_colors_found = EMPTY;
+-  int color;
+-  int k;
+-
+-  for (pos = BOARDMIN; pos < BOARDMAX; pos++)
+-    if (ON_BOARD(pos))
+-      initial_colors_found |= initial_board[pos];
+-  
+-  fprintf(stderr, "(;GM[1]FF[4]SZ[%d]KM[%.1f]HA[%d]GN[GNU Go %s stepped on a bug]\n",
+-	  board_size, komi, handicap, gg_version());
+-
+-  for (color = WHITE; color <= BLACK; color++) {
+-    if (initial_colors_found & color) {
+-      fprintf(stderr, "A%s", color == WHITE ? "W" : "B");
+-      for (k = 0, pos = BOARDMIN; pos < BOARDMAX; pos++) {
+-	if (ON_BOARD(pos) && initial_board[pos] == color) {
+-	  fprintf(stderr, "[%c%c]", 'a' + J(pos), 'a' + I(pos));
+-	  k++;
+-	  if (k % 16 == 0)
+-	    fprintf(stderr, "\n");
+-	}
+-      }
+-      if (k % 16 != 0)
+-	fprintf(stderr, "\n");
+-    }
+-  }
+-
+-  if (move_history_pointer > 0) {
+-    for (k = 0; k < move_history_pointer; k++) {
+-      fprintf(stderr, ";%s", move_history_color[k] == WHITE ? "W" : "B");
+-      if (move_history_pos[k] == PASS_MOVE)
+-	fprintf(stderr, "[]");
+-      else
+-	fprintf(stderr, "[%c%c]", 'a' + J(move_history_pos[k]),
+-		'a' + I(move_history_pos[k]));
+-      
+-      if (k % 12 == 11)
+-	fprintf(stderr, "\n");
+-    }
+-    if (k % 12 != 0)
+-      fprintf(stderr, "\n");
+-  }
+-  fprintf(stderr, ")\n");
+ }
+ 
+ /*
+@@ -278,21 +234,12 @@ abortgo(const char *file, int line, const char *msg, int pos)
+ 
+   /* Print the board at the top of the stack. */
+   simple_showboard(stderr);
+-  fprintf(stderr, "\n");
++  ;
+ 
+   dump_board_sgf();
+-
+-  fprintf(stderr, "gnugo %s (seed %d): You stepped on a bug.\n",
+-          gg_version(), get_random_seed());
+   if (board_size >= 9 && board_size <= 19) {
+-    fprintf(stderr, "\
+-Please mail this message, including the debug output above, \
+-to gnugo@gnu.org\n");
+   }
+-  fprintf(stderr, "\n");
+-
+-  fflush(stderr);
+-  fflush(stdout);
++  ;
+ 
+   abort();  /* cause core dump */
+ }
+@@ -466,11 +413,11 @@ draw_letter_coordinates(FILE *outfile)
+   int i;
+   int ch;
+   
+-  fprintf(outfile, "  ");
++  ;
+   for (i = 0, ch = 'A'; i < board_size; i++, ch++) {
+     if (ch == 'I')
+       ch++;
+-    fprintf(outfile, " %c", ch);
++    ;
+   }
+ }
+ 
+@@ -486,27 +433,27 @@ simple_showboard(FILE *outfile)
+   draw_letter_coordinates(outfile);
+   
+   for (i = 0; i < board_size; i++) {
+-    fprintf(outfile, "\n%2d", board_size - i);
++    ;
+     
+     for (j = 0; j < board_size; j++) {
+       if (BOARD(i, j) == EMPTY)
+-	fprintf(outfile, " %c", is_hoshi_point(i, j) ? '+' : '.');
++	;
+       else
+-	fprintf(outfile, " %c", BOARD(i, j) == BLACK ? 'X' : 'O');
++	;
+     }
+ 
+-    fprintf(outfile, " %d", board_size - i);
++    ;
+     
+     if ((board_size < 10 && i == board_size-2)
+ 	|| (board_size >= 10 && i == 8))
+-      fprintf(outfile, "     WHITE (O) has captured %d stones", black_captured);
++      ;
+     
+     if ((board_size < 10 && i == board_size-1)
+ 	|| (board_size >= 10 && i == 9))
+-      fprintf(outfile, "     BLACK (X) has captured %d stones", white_captured);
++      ;
+   }
+   
+-  fprintf(outfile, "\n");
++  ;
+   draw_letter_coordinates(outfile);
+ }
+ 
