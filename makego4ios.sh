@@ -1,6 +1,10 @@
 export SDK_VERSION=7.1
 #make the different typefils to compile
 cd ./gnugo
+git checkout -b ioscompile
+git apply ../remove_print.patch
+git apply ../rename.patch
+
 ./configure
 sed -i "" '/TERM/d' config.h
 sed -i "" '/NCURSES/d' config.h
@@ -20,6 +24,7 @@ cp -r ./gnugo ./gnugo32
 mkdir gnugolib
 mkdir gnugolib/include
 for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
+    echo 'start compile for'$type
     mkdir $type;
     compileFolder='./gnugo32';
     if [[ $type = 'x86_64' || $type == 'arm64' ]]; then
@@ -28,8 +33,9 @@ for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
     cd $compileFolder;
     for folder in 'engine' 'patterns' 'interface' 'sgf' 'utils'; do
         cd $folder
+        echo 'compile libs in '$folder
         cp ../../util/$folder/* ./
-        if [[ $folder = 'patterns' ]]; then
+        if [[ $folder = 'patterns' && ! -f 'endgamep.c' ]]; then
             mv influence.c influencep.c
             mv endgame.c endgamep.c
         fi
