@@ -1,4 +1,4 @@
-export SDK_VERSION=7.1
+export SDK_VERSION=8.0
 #make the different typefils to compile
 cd ./gnugo
 git checkout -b ioscompile
