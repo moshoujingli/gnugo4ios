@@ -1,3 +1,8 @@
+From 032530ae5b58937f64063a32803dee0668df4b9f Mon Sep 17 00:00:00 2001
+From: BiXiaopeng <bixiaopeng@BiXiaopengdeMacBook-Pro.local>
+Date: Sun, 5 Jan 2014 12:02:12 +0900
+Subject: [PATCH] remove output
+
 diff --git a/engine/printutils.c b/engine/printutils.c
 index 7a1509e..1496c44 100644
 --- a/engine/printutils.c

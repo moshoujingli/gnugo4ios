@@ -1,3 +1,16 @@
+#####UPDATE
+
+First of all,I think it's better rename the var with name shadow to shadow_board because there exists a global var named this in iOS.
+And the printf or some debug code should also be removed.
+I prepared two patch here and you can patch them like below:
+
+'''
+$ git checkout -b ioscompile
+$ git am --signoff < ../remove_print.patch
+$ git am --signoff < ../rename.patch
+'''
+
+-----------
 首先我假设你的电脑是64位的ios，工具BSD的，zsh
 先把gnugoc的源码下下来，放在和脚本还有util一个文件夹下，就像这样
 gnugo
