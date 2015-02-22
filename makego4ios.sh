@@ -1,9 +1,6 @@
-export SDK_VERSION=8.0
+export SDK_VERSION=8.1
 #make the different typefils to compile
 cd ./gnugo
-git checkout -b ioscompile
-git apply ../remove_print.patch
-git apply ../rename.patch
 
 ./configure
 sed -i "" '/TERM/d' config.h
@@ -23,7 +20,7 @@ cp -r ./gnugo ./gnugo32
 #do compile
 mkdir gnugolib
 mkdir gnugolib/include
-for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
+for type in 'armv7' 'armv7s' 'x86_64' 'arm64'; do
     echo 'start compile for'$type
     mkdir $type;
     compileFolder='./gnugo32';
@@ -52,7 +49,7 @@ for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
 done
 
 
-for type in 'armv7' 'armv7s' 'i386' 'x86_64' 'arm64'; do
+for type in 'armv7' 'armv7s' 'x86_64' 'arm64'; do
     cd ./$type
         if [[ $type = 'armv7s' || $type = 'armv7' || $type = 'arm64' ]]; then
             export SDK_TYPE='OS'
@@ -69,13 +66,12 @@ cp ../armv7/*.h ./include
 xcrun -sdk iphoneos lipo -output ./gnugo.a -create \
 -arch armv7s ../armv7s/gnugo.a \
 -arch armv7 ../armv7/gnugo.a \
--arch i386 ../i386/gnugo.a \
 -arch x86_64 ../x86_64/gnugo.a \
 -arch arm64 ../arm64/gnugo.a
 lipo -info ./gnugo.a
 cd ..
 #clean
-for type in 'arm64' 'armv7' 'armv7s' 'i386' 'x86_64'; do
+for type in 'arm64' 'armv7' 'armv7s' 'x86_64'; do
     rm -rf ./$type;
 done
 rm -rf gnugo32
